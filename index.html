@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>BodyForge50</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">BODYFORGE50</p>
+      <h1 id="headerTitle">Today</h1>
+    </div>
+    <div class="phase-pill">Phase 1 · Foundation</div>
+  </header>
+
+  <main id="app" class="app-shell"></main>
+
+  <nav class="bottom-nav" aria-label="Primary navigation">
+    <button data-view="today" class="nav-item active">Today</button>
+    <button data-view="plan" class="nav-item">Plan</button>
+    <button data-view="progress" class="nav-item">Progress</button>
+    <button data-view="profile" class="nav-item">Profile</button>
+  </nav>
+
+  <template id="readinessTemplate">
+    <section class="card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">20-SECOND CHECK</p>
+          <h2>How are you today?</h2>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <label>Sleep
+          <select id="sleepInput">
+            <option value="good">Good</option>
+            <option value="ok" selected>OK</option>
+            <option value="poor">Poor</option>
+          </select>
+        </label>
+        <label>Energy <span id="energyValue">6</span>/10
+          <input id="energyInput" type="range" min="1" max="10" value="6" />
+        </label>
+        <label>Foot pain <span id="footValue">0</span>/10
+          <input id="footInput" type="range" min="0" max="10" value="0" />
+        </label>
+        <label>Shoulder/biceps <span id="armValue">0</span>/10
+          <input id="armInput" type="range" min="0" max="10" value="0" />
+        </label>
+        <label>General soreness <span id="sorenessValue">0</span>/10
+          <input id="sorenessInput" type="range" min="0" max="10" value="0" />
+        </label>
+        <label class="toggle-row">Feeling sick?
+          <input id="sickInput" type="checkbox" />
+        </label>
+      </div>
+      <button id="assessBtn" class="primary-btn">Assess readiness</button>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
