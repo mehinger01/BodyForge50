@@ -21,19 +21,40 @@
     };
   }
 
-  function addImportControl() {
-    const header = document.querySelector('.app-header');
-    if (!header || document.getElementById('importDataBtn')) return;
+  async function importFile(file) {
+    const incoming = JSON.parse(await file.text());
+    if (!incoming || typeof incoming !== 'object' || !incoming.profile) {
+      throw new Error('This does not look like a BodyForge50 data file.');
+    }
+    const current = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const merged = mergeState(current, incoming);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+  }
+
+  function appendDataControls() {
+    const app = document.getElementById('app');
+    if (!app || document.getElementById('importDataBtn')) return;
+
+    const cards = [...app.querySelectorAll('.card')];
+    const dataCard = cards.find(card => card.querySelector('h2')?.textContent.trim() === 'Data');
+    if (!dataCard) return;
+
+    const privacy = document.createElement('p');
+    privacy.className = 'note';
+    privacy.innerHTML = '<strong>Privacy:</strong> imported profile and health data stay in this browser. They are not uploaded to the public GitHub repository.';
+
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+    row.style.marginTop = '12px';
 
     const button = document.createElement('button');
     button.id = 'importDataBtn';
     button.type = 'button';
-    button.className = 'secondary-btn';
+    button.className = 'primary-btn';
     button.textContent = 'Import Data';
-    button.style.marginLeft = 'auto';
-    button.style.whiteSpace = 'nowrap';
 
     const input = document.createElement('input');
+    input.id = 'importDataFile';
     input.type = 'file';
     input.accept = 'application/json,.json';
     input.hidden = true;
@@ -43,14 +64,8 @@
       const file = input.files?.[0];
       if (!file) return;
       try {
-        const incoming = JSON.parse(await file.text());
-        if (!incoming || typeof incoming !== 'object' || !incoming.profile) {
-          throw new Error('This does not look like a BodyForge50 data file.');
-        }
-        const current = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        const merged = mergeState(current, incoming);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        alert('BodyForge50 data imported. Your existing workout logs were preserved.');
+        await importFile(file);
+        alert('BodyForge50 data imported successfully. Existing workout logs were preserved.');
         location.reload();
       } catch (error) {
         alert(`Import failed: ${error.message}`);
@@ -59,9 +74,30 @@
       }
     });
 
-    header.appendChild(button);
-    header.appendChild(input);
+    dataCard.insertBefore(privacy, dataCard.querySelector('#exportBtn'));
+    row.appendChild(button);
+    row.appendChild(input);
+    const exportBtn = dataCard.querySelector('#exportBtn');
+    if (exportBtn) row.appendChild(exportBtn);
+    dataCard.appendChild(row);
   }
 
-  addImportControl();
+  if (typeof window.renderProfile === 'function') {
+    const originalRenderProfile = window.renderProfile;
+    window.renderProfile = function (...args) {
+      const result = originalRenderProfile.apply(this, args);
+      appendDataControls();
+      return result;
+    };
+  } else if (typeof renderProfile === 'function') {
+    const originalRenderProfile = renderProfile;
+    renderProfile = function (...args) {
+      const result = originalRenderProfile.apply(this, args);
+      appendDataControls();
+      return result;
+    };
+  }
+
+  // If Profile is already visible when this script loads, enhance it immediately.
+  appendDataControls();
 })();
